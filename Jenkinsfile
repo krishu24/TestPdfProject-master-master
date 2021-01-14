@@ -1,26 +1,27 @@
-pipeline{
+ pipeline {
     agent any
-        tools {
-            // Install the Maven version configured as "M3" and add it to the path.
-            maven "M3"
+     	environment {
+        MAVEN_HOME = tool('M3')
+    }
+
+	stages {
+        stage('Git checkout') {
+            steps {
+               git credentialsId: 'GitHub', 
+               url: 'https://github.com/krishu24/TestPdfProject-master-master.git'   
+               }
         }
-        stages{
-           stage ('Git Checkout'){
-                steps{
-                  checkout scm
-                }
+		stage('Maven Build'){
+		steps{
+		    sh '${MAVEN_HOME}/bin/mvn -B verify'
            }
-	   stage('Maven Build'){
-	        steps{
-		           sh 'mvn -Dmaven.test.failure.ignore=true clean package'
-                }
-	   }
-
-	   stage('JunitTestResults') {
-		 steps{
-	             junit '**/target/surefire-reports/TEST-*.xml'
-                 archiveArtifacts 'target/*.jar'
+			}
+			
+		stage('JunitTestResults') {
+		steps{
+	        junit '**/target/surefire-reports/TEST-*.xml'
+              archiveArtifacts 'target/*.jar'
+			  }
          }
-
-       }
+}
 }
